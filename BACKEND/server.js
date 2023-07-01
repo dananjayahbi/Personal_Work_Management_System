@@ -14,6 +14,7 @@ app.use(express.json());
 
 //Setting up routing
 app.use("/user", require("./routes/User"));
+app.use("/ideas", require("./routes/Ideas"));
 
 app.listen(PORT, () => {
   console.log("Server up with port : " + PORT);
