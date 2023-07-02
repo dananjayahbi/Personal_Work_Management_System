@@ -76,7 +76,7 @@ const FORM_VALIDATION = Yup.object().shape({
         >
             <div className="popup">
             <DialogTitle>
-          <div className="d-flex justify-content-between">
+            <div className="d-flex justify-content-between">
             <p className="popupTitle">Add User</p>
             <ClearIcon
               onClick={() => {

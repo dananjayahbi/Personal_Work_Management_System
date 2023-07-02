@@ -14,12 +14,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import drawerLogo from "../images/drawerLogo.png";
 import logoIcon from "../images/logo-icon.png";
 import axios from "axios";
 import { Avatar } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import Home from "./Pages/Home";
+import Ideas from "./Pages/Ideas";
 import {
   Routes,
   Route,
@@ -36,6 +38,7 @@ const drawerWidth = 240;
 // NAVIGATION
 const commonNav = [
   { name: "Dashboard", icon: <GridViewIcon />, path: "/" },
+  { name: "Ideas", icon: <LightbulbIcon />, path: "/ideas" }
 ];
 
 const specialNav = [
@@ -438,6 +441,7 @@ export default function Dashboard() {
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/users" element={<Users />} />
+          <Route exact path="/ideas" element={<Ideas />} />
         </Routes>
       </Box>
     </Box>
