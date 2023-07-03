@@ -5,10 +5,14 @@ import AddIdea from '../PageComponents/AddIdea';
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import { Card, CardContent, Chip, Grid, Typography } from '@mui/material';
+import DeleteIdea from "../PageComponents/DeleteIdea";
 
 export default function Ideas() {
   const [fetIdeas, setFetchedIdeas] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
+  const [openPopup3, setOpenPopup3] = useState(false);
+  const [openPopup4, setOpenPopup4] = useState(false);
+  const [selectedIdeaID, setSelectedIdeaID] = useState(null);
 
   // Get all ideas
   useEffect(() => {
@@ -24,14 +28,16 @@ export default function Ideas() {
     }, 500);
   }, []);
 
-  // The popup
-  const [openPopup3, setOpenPopup3] = useState(false);
-
   // To display ideas as cards
   const IdeaList = ({ ideas }) => {
     const filteredIdeas = selectedTag
       ? ideas.filter((idea) => idea.tags.includes(selectedTag))
       : ideas;
+
+    const handleDelete = (ideaID) => {
+      setSelectedIdeaID(ideaID);
+      setOpenPopup4(true);
+    };
 
     return (
       <Grid container spacing={2}>
@@ -49,6 +55,13 @@ export default function Ideas() {
                   ))}
                 </Grid>
               </CardContent>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => handleDelete(idea._id)}
+              >
+                Delete
+              </Button>
             </Card>
           </Grid>
         ))}
@@ -61,7 +74,7 @@ export default function Ideas() {
   return (
     <>
       <div className="d-flex justify-content-center">
-        {/* Add User button */}
+        {/* Add Idea button */}
         <Button
           startIcon={<AddIcon />}
           variant="outlined"
@@ -77,7 +90,7 @@ export default function Ideas() {
             marginBottom: "25px",
           }}
           onClick={() => {
-            setOpenPopup3(true); // open the popup
+            setOpenPopup3(true); // Open the popup
           }}
         >
           Add Idea
@@ -105,6 +118,15 @@ export default function Ideas() {
           <IdeaList ideas={fetIdeas} />
         </Grid>
       </div>
+
+      {/* Delete Idea Popup */}
+      {selectedIdeaID && (
+        <DeleteIdea
+          ideaID={selectedIdeaID}
+          openPopup4={openPopup4}
+          setOpenPopup4={setOpenPopup4}
+        />
+      )}
     </>
   );
 }
