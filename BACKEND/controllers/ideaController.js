@@ -52,8 +52,33 @@ const newIdea = async (req, res) => {
   }
 };
 
+//Delete Idea
+const deleteIdea = async (req, res) => {
+  try {
+    const deleted = await Idea.findByIdAndDelete(req.params.id);
+
+    if (deleted) {
+      res.status(200).json({
+        data: "Idea Deleted",
+        status: true,
+      });
+    } else {
+      res.status(401).json({
+        errrorMessage: "Failed to delete the Idea!",
+        status: false,
+      });
+    }
+  } catch (error) {
+    res.status(401).json({
+      errorMessage: "Something went wrong!\n" + error,
+      status: false,
+    });
+  }
+};
+
 //Export
 module.exports = {
     getAllIdeas,
-    newIdea
+    newIdea,
+    deleteIdea
 };
