@@ -6,12 +6,14 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import { Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import DeleteIdea from "../PageComponents/DeleteIdea";
+import UpdateIdea from "../PageComponents/UpdateIdea";
 
 export default function Ideas() {
   const [fetIdeas, setFetchedIdeas] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
   const [openPopup3, setOpenPopup3] = useState(false);
   const [openPopup4, setOpenPopup4] = useState(false);
+  const [openPopup5, setOpenPopup5] = useState(false);
   const [selectedIdeaID, setSelectedIdeaID] = useState(null);
 
   // Get all ideas
@@ -39,6 +41,11 @@ export default function Ideas() {
       setOpenPopup4(true);
     };
 
+    const handleUpdate = (ideaID) => {
+      setSelectedIdeaID(ideaID);
+      setOpenPopup5(true);
+    };
+
     return (
       <Grid container spacing={2}>
         {filteredIdeas.map((idea, index) => (
@@ -55,6 +62,13 @@ export default function Ideas() {
                   ))}
                 </Grid>
               </CardContent>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => handleUpdate(idea._id)}
+              >
+                Update
+              </Button>
               <Button
                 variant="outlined"
                 color="error"
@@ -84,38 +98,36 @@ export default function Ideas() {
             "&:last-child td, &:last-child th": { border: 0 },
             "&:hover": {
               backgroundColor: "#1e6907",
-              color: "var(--white)",
-              border: "1px solid var(--white)",
+              color: "white",
             },
-            marginBottom: "25px",
           }}
-          onClick={() => {
-            setOpenPopup3(true); // Open the popup
-          }}
+          onClick={() => setOpenPopup3(true)}
         >
           Add Idea
         </Button>
-
-        <AddIdea openPopup3={openPopup3} setOpenPopup3={setOpenPopup3} />
+        <AddIdea openPopup3={openPopup3} setOpenPopup3={setOpenPopup3}></AddIdea>
       </div>
-      <div>
-        {/* Tag buttons */}
-        <Grid container spacing={1} marginTop={"10px"} justifyContent="center">
-          {tagList.map((tag, index) => (
-            <Grid item key={index}>
-              <Button
-                variant={selectedTag === tag ? "contained" : "outlined"}
-                onClick={() => setSelectedTag(tag)}
-              >
-                {tag}
-              </Button>
-            </Grid>
-          ))}
-        </Grid>
 
-        <Typography variant="h4">Idea List</Typography>
+      {/* Idea List */}
+      <div className="container">
         <Grid container spacing={2} marginTop={"10px"}>
-          <IdeaList ideas={fetIdeas} />
+          <Grid container spacing={2} marginTop={"10px"}>
+            {tagList.map((tag, index) => (
+              <Grid item key={index}>
+                <Button
+                  variant={selectedTag === tag ? "contained" : "outlined"}
+                  onClick={() => setSelectedTag(tag)}
+                >
+                  {tag}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Typography variant="h4">Idea List</Typography>
+          <Grid container spacing={2} marginTop={"10px"}>
+            <IdeaList ideas={fetIdeas} />
+          </Grid>
         </Grid>
       </div>
 
@@ -125,6 +137,15 @@ export default function Ideas() {
           ideaID={selectedIdeaID}
           openPopup4={openPopup4}
           setOpenPopup4={setOpenPopup4}
+        />
+      )}
+
+      {/* Update Idea Popup */}
+      {selectedIdeaID && (
+        <UpdateIdea
+          ideaID={selectedIdeaID}
+          openPopup={openPopup5}
+          setOpenPopup={setOpenPopup5}
         />
       )}
     </>

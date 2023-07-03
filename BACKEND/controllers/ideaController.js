@@ -52,6 +52,24 @@ const newIdea = async (req, res) => {
   }
 };
 
+//Get an Idea
+const getIdea = async (req, res) => {
+  const { 
+    _id, 
+    idea, 
+    tags
+  } = await Idea.findById(
+    req.params.id
+  );
+
+  res.status(200).json({
+    id: _id,
+    idea, 
+    tags
+  });
+};
+
+
 //Update Idea
 const updateIdea = async (req, res) => {
   try {
@@ -117,5 +135,6 @@ module.exports = {
     getAllIdeas,
     newIdea,
     deleteIdea,
-    updateIdea
+    updateIdea,
+    getIdea
 };

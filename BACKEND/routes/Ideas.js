@@ -4,7 +4,8 @@ const {
     getAllIdeas,
     newIdea,
     deleteIdea,
-    updateIdea
+    updateIdea,
+    getIdea
 } = require("../controllers/ideaController");
 
 // GET ALL IDEAS
@@ -16,7 +17,10 @@ router.post("/newIdea", newIdea);
 // DELETE THE IDEA
 router.delete("/deleteIdea/:id", deleteIdea);
 
-// Edit THE IDEA
+// EDIT THE IDEA
 router.put("/updateIdea/:id", updateIdea);
+
+// GET THE IDEA
+router.get("/getIdea/:id", getIdea);
 
 module.exports = router;
