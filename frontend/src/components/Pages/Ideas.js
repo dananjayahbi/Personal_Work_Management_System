@@ -33,7 +33,7 @@ export default function Ideas() {
 
     // Fetch stored tags from the server
     fetchStoredTags();
-  }, []);
+  }, [openPopup3, openPopup4, openPopup5]);
 
   const fetchStoredTags = () => {
     axios

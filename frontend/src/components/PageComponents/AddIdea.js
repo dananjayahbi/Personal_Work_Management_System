@@ -86,7 +86,7 @@ export default function AddUser(props) {
                 .then((res) => {
                   sessionStorage.setItem("ideaCreated", "1");
                   setOpenPopup3(false);
-                  window.location.reload(false);
+                  //window.location.href = "./ideas";
                 })
                 .catch((err) => {
                   if (

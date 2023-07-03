@@ -11,7 +11,7 @@ const DeleteIdea = ({ ideaID, openPopup4, setOpenPopup4 }) => {
         console.log('Idea deleted successfully!');
         // Perform any additional actions after successful deletion
         setOpenPopup4(false);
-        window.location.reload(false);
+        //window.location.href = "./ideas";
       })
       .catch((err) => {
         console.error('Error deleting idea:', err);

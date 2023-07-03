@@ -64,7 +64,7 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
       .then((res) => {
         console.log('Idea updated successfully!');
         setOpenPopup(false);
-        window.location.reload(false);
+        //window.location.href = "./ideas";
         // Perform any additional actions after successful update
       })
       .catch((err) => {
