@@ -10,11 +10,13 @@ import UpdateIdea from "../PageComponents/UpdateIdea";
 
 export default function Ideas() {
   const [fetIdeas, setFetchedIdeas] = useState([]);
-  const [selectedTag, setSelectedTag] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [openPopup3, setOpenPopup3] = useState(false);
   const [openPopup4, setOpenPopup4] = useState(false);
   const [openPopup5, setOpenPopup5] = useState(false);
   const [selectedIdeaID, setSelectedIdeaID] = useState(null);
+  const [filteringTags, setFilteringTags] = useState("");
+  const [storedTags, setStoredTags] = useState([]);
 
   // Get all ideas
   useEffect(() => {
@@ -28,12 +30,26 @@ export default function Ideas() {
           console.log(err);
         });
     }, 500);
+
+    // Fetch stored tags from the server
+    fetchStoredTags();
   }, []);
+
+  const fetchStoredTags = () => {
+    axios
+      .get("http://localhost:8070/tags/getTags")
+      .then((res) => {
+        setStoredTags(res.data.tags);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   // To display ideas as cards
   const IdeaList = ({ ideas }) => {
-    const filteredIdeas = selectedTag
-      ? ideas.filter((idea) => idea.tags.includes(selectedTag))
+    const filteredIdeas = selectedTags.length > 0
+      ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
       : ideas;
 
     const handleDelete = (ideaID) => {
@@ -83,7 +99,41 @@ export default function Ideas() {
     );
   };
 
-  const tagList = Array.from(new Set(fetIdeas.flatMap((idea) => idea.tags))); // Get unique tag list from fetched ideas
+  const handleTagChange = (event) => {
+    setFilteringTags(event.target.value);
+  };
+
+  const addTags = () => {
+    const tagsArray = filteringTags.split(",").map(tag => tag.trim());
+    const uniqueTags = tagsArray.filter(tag => !selectedTags.includes(tag));
+  
+    if (uniqueTags.length > 0) {
+      // Save the tags to the server
+      axios
+        .post("http://localhost:8070/tags/addTags", { tags: uniqueTags })
+        .then(() => {
+          fetchStoredTags(); // Fetch the updated tags from the server
+          setSelectedTags([...selectedTags, ...uniqueTags]);
+          setFilteringTags("");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+  
+
+  const handleTagClick = (tag) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };  
+
+  const handleRemoveTag = (tag) => {
+    const updatedTags = selectedTags.filter(t => t !== tag);
+    setSelectedTags(updatedTags);
+  };
+
 
   return (
     <>
@@ -108,15 +158,24 @@ export default function Ideas() {
         <AddIdea openPopup3={openPopup3} setOpenPopup3={setOpenPopup3}></AddIdea>
       </div>
 
-      {/* Idea List */}
+      {/* Tags List */}
       <div className="container">
         <Grid container spacing={2} marginTop={"10px"}>
           <Grid container spacing={2} marginTop={"10px"}>
-            {tagList.map((tag, index) => (
+            <Grid item>
+              <input type="text" placeholder="Enter tags separated by comma" value={filteringTags} onChange={handleTagChange} />
+              <Button variant="contained" onClick={addTags}>Add Tags</Button>
+            </Grid>
+          </Grid>
+
+          {/* Stored Tags */}
+          <Typography variant="h6">Stored Tags:</Typography>
+          <Grid container spacing={1} marginTop={"10px"}>
+            {storedTags.map((tag, index) => (
               <Grid item key={index}>
                 <Button
-                  variant={selectedTag === tag ? "contained" : "outlined"}
-                  onClick={() => setSelectedTag(tag)}
+                  variant={selectedTags.includes(tag) ? "contained" : "outlined"}
+                  onClick={() => handleTagClick(tag)}
                 >
                   {tag}
                 </Button>
@@ -124,6 +183,22 @@ export default function Ideas() {
             ))}
           </Grid>
 
+          {/* Selected Tags */}
+          <Typography variant="h6">Selected Tags:</Typography>
+          <Grid container spacing={1} marginTop={"10px"}>
+            {selectedTags.map((tag, index) => (
+              <Grid item key={index}>
+                <Button
+                  variant="contained"
+                  onClick={() => handleRemoveTag(tag)}
+                >
+                  {tag}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Idea List */}
           <Typography variant="h4">Idea List</Typography>
           <Grid container spacing={2} marginTop={"10px"}>
             <IdeaList ideas={fetIdeas} />
