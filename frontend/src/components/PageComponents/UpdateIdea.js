@@ -86,7 +86,7 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
       }}
     >
       <div className="popup">
-        <DialogTitle>
+        <DialogTitle sx={{ marginBottom: '-25px' }}>
           <div className="d-flex justify-content-between">
             <p className="popupTitle">Update Idea</p>
           </div>
@@ -102,7 +102,7 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
           >
 
               <Form>
-                <TextField name="idea" label="Idea" multiline minRows={10} />
+                <TextField name="idea" label="Idea" sx={{ marginTop: '15px' , marginBottom: '15px' }} multiline minRows={10} />
 
                 <TextField name="tags" label="Tags" />
 
