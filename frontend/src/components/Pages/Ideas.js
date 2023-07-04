@@ -70,7 +70,7 @@ export default function Ideas() {
             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography sx={{ marginBottom: '15px' }}>{idea.idea}</Typography>
-                <Typography  fontWeight={600}>Tags:</Typography>
+                <Typography  fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
                 <Grid container spacing={1}>
                   {idea.tags.map((tag, tagIndex) => (
                     <Grid item key={tagIndex}>
@@ -220,7 +220,7 @@ export default function Ideas() {
         </Grid>
 
 
-          {/* Stored Tags */}
+          {/* Filtering Tags */}
           <Grid container spacing={1} marginTop={"10px"} marginLeft={"-15px"}>
           <Typography variant="h6" paddingTop={"10px"} color={"#28395a"}>Filtering Tags:</Typography>
 
@@ -233,9 +233,9 @@ export default function Ideas() {
                     background: selectedTags.includes(tag) ? "#1e6907" : "transparent",
                     color: selectedTags.includes(tag) ? "#fff" : "#1e6907",
                     borderRadius: "4px",
-                    padding: "8px 16px",
+                    padding: "2px 16px",
                     fontWeight: "bold",
-                    border: selectedTags.includes(tag) ? "none" : "1px solid #1e6907",
+                    border: selectedTags.includes(tag) ? "none" : "1px solid rgba(30, 105, 7, 0.5)",
                     cursor: "pointer",
                     transition: "background 0.3s ease-in-out",
                   }}
@@ -259,7 +259,7 @@ export default function Ideas() {
             ))}
           </Grid>
 
-          {/* Selected Tags */}
+          {/* Selected Filters */}
           {selectedTags.length > 0 && (
             <Grid container spacing={1} marginTop={"10px"} marginLeft={"-15px"}>
               <Typography variant="h6" paddingTop={"10px"} color={"#28395a"}>
@@ -274,7 +274,7 @@ export default function Ideas() {
                       background: "#1e6907",
                       color: "#fff",
                       borderRadius: "4px",
-                      padding: "8px 16px",
+                      padding: "2px 16px",
                       fontWeight: "bold",
                       border: "none",
                       cursor: "pointer",
@@ -283,7 +283,7 @@ export default function Ideas() {
                     onMouseOver={(e) => {
                       e.target.style.background = "rgba(30, 105, 7, 0.2)";
                       e.target.style.color = "#1e6907";
-                      e.target.style.border = "1px solid #1e6907";
+                      e.target.style.border = "1px solid rgba(30, 105, 7, 0.5)";
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.background = "#1e6907";
