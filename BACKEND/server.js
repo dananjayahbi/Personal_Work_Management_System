@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const tagsRouter = require('./routes/Tags');
 
 //Setting up the server
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 //Setting up routing
 app.use("/user", require("./routes/User"));
 app.use("/ideas", require("./routes/Ideas"));
+app.use('/tags', tagsRouter);
 
 app.listen(PORT, () => {
   console.log("Server up with port : " + PORT);

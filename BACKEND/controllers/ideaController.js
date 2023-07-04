@@ -52,8 +52,89 @@ const newIdea = async (req, res) => {
   }
 };
 
+//Get an Idea
+const getIdea = async (req, res) => {
+  const { 
+    _id, 
+    idea, 
+    tags
+  } = await Idea.findById(
+    req.params.id
+  );
+
+  res.status(200).json({
+    id: _id,
+    idea, 
+    tags
+  });
+};
+
+
+//Update Idea
+const updateIdea = async (req, res) => {
+  try {
+    const { 
+      idea, 
+      tags,
+    } = req.body;
+
+    let updateData = {
+      idea,
+      tags
+    };
+
+    // Updating
+    const update = await Idea.findByIdAndUpdate(req.params.id, updateData);
+
+    if (update) {
+      res.status(200).json({
+        data: 'Idea updated successfully',
+        status: true,
+      });
+    } else {
+      res.status(401).json({
+        errorMessage: 'Failed to edit the Idea!',
+        status: false,
+      });
+    }
+    
+  } catch (error) {
+    res.status(401).json({
+      errorMessage: 'Something went wrong!\n' + error,
+      status: false,
+    });
+  }
+};
+
+//Delete Idea
+const deleteIdea = async (req, res) => {
+  try {
+    const deleted = await Idea.findByIdAndDelete(req.params.id);
+
+    if (deleted) {
+      res.status(200).json({
+        data: "Idea Deleted",
+        status: true,
+      });
+    } else {
+      res.status(401).json({
+        errrorMessage: "Failed to delete the Idea!",
+        status: false,
+      });
+    }
+  } catch (error) {
+    res.status(401).json({
+      errorMessage: "Something went wrong!\n" + error,
+      status: false,
+    });
+  }
+};
+
 //Export
 module.exports = {
     getAllIdeas,
-    newIdea
+    newIdea,
+    deleteIdea,
+    updateIdea,
+    getIdea
 };

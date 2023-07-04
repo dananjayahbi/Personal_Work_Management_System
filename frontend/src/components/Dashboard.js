@@ -17,8 +17,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import drawerLogo from "../images/drawerLogo.png";
 import logoIcon from "../images/logo-icon.png";
-import axios from "axios";
-import { Avatar } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import Home from "./Pages/Home";
 import Ideas from "./Pages/Ideas";
@@ -30,8 +28,6 @@ import {
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import Users from "./Pages/Users";
-import Notification from "./DispayComponents/Notification";
-import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -133,7 +129,6 @@ export default function Dashboard() {
     message: "",
     type: "",
   });
-  const navigate = useNavigate();
   const [open, setOpen] = useState(true);
   const [windowName, setWindow] = useState("Dashboard");
   const token = localStorage.getItem("token");
@@ -155,23 +150,6 @@ export default function Dashboard() {
     }
   });
 
-  //Get Current logged in user's username
-  const [curUname, setCurUname] = useState(" ");
-  useEffect(() => {
-    axios
-      .get(`http://localhost:8070/user/get`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setCurUname(res.data.username);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
 
   const logout = () => {
     window.localStorage.clear();
@@ -182,7 +160,6 @@ export default function Dashboard() {
   return (
     <Box sx={{ display: "flex" }}>
       {/* NOTIFICATION */}
-      <Notification notify={notify} setNotify={setNotify} />
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -239,21 +216,6 @@ export default function Dashboard() {
               </IconButton>
             </Tooltip>
 
-            {/* profile icon */}
-            <Tooltip title="Profile">
-              <IconButton
-                sx={{ p: 0 }}
-                onClick={() => {
-                  //navigate("/Profile");
-                }}
-              >
-                <Avatar
-                  alt={curUname}
-                  src={"/static/images/avatar/1.jpg"}
-                  sx={{ width: 36, height: 36 }}
-                />
-              </IconButton>
-            </Tooltip>
           </Box>
         </Toolbar>
 
