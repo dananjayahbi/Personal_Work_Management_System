@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Divider, Grid } from "@mui/material";
+import React, { useState , useEffect } from "react";
+import { Divider, Grid, MenuItem } from "@mui/material";
 import "../../styles/dashboard.css";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -22,7 +22,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 // FORMIK
 const INITIAL_FORM_STATE = {
   idea: "",
-  tags: ""
+  tags: []
 };
 
 export default function AddUser(props) {
@@ -33,6 +33,24 @@ export default function AddUser(props) {
     message: "",
     type: ""
   });
+
+  const [storedTags, setStoredTags] = useState([]); //The array of tags
+
+  // Get all tags
+  useEffect(() => {
+    fetchStoredTags();
+  }, [openPopup3]);
+
+  const fetchStoredTags = () => {
+    axios
+      .get("http://localhost:8070/tags/getTags")
+      .then((res) => {
+        setStoredTags(res.data.tags);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   return (
     <Dialog
@@ -77,16 +95,17 @@ export default function AddUser(props) {
           <Formik
             initialValues={{ ...INITIAL_FORM_STATE }}
             onSubmit={async (values) => {
-              const tagsArray = values.tags.split(",").map((tag) => tag.trim());
+              const tagsString = values.tags.join(", ");
               await axios
                 .post("http://localhost:8070/ideas/newIdea", {
                   idea: values.idea,
-                  tags: tagsArray
+                  tags: tagsString,
+                  ideaStatus: "",
+                  bookmark: "false"
                 })
                 .then((res) => {
                   sessionStorage.setItem("ideaCreated", "1");
                   setOpenPopup3(false);
-                  //window.location.href = "./ideas";
                 })
                 .catch((err) => {
                   if (
@@ -101,28 +120,49 @@ export default function AddUser(props) {
                 });
             }}
           >
-            <Form>
-              <Grid container sx={{ paddingTop: "10px" }} spacing={2}>
-                <Grid item xs={12}>
-                  <TextField name="idea" label="Idea" multiline minRows={10} />
+            {({ values, handleChange, handleBlur, errors, touched }) => (
+              <Form>
+                <Grid container sx={{ paddingTop: "10px" }} spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField name="idea" label="Idea" multiline minRows={10} />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      name="tags"
+                      label="Tags"
+                      select
+                      SelectProps={{
+                        multiple: true,
+                        renderValue: (selected) => selected.join(", "),
+                      }}
+                      value={values.tags}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.tags && Boolean(errors.tags)}
+                      helperText={touched.tags && errors.tags}
+                    >
+                      {storedTags.map((tag) => (
+                        <MenuItem key={tag} value={tag}>
+                          {tag}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  <div className="d-flex addButtons">
+                    <ButtonWrapper
+                      style={{ marginRight: "15px" }}
+                      onClick={() => setOpenPopup3(false)}
+                    >
+                      Cancel
+                    </ButtonWrapper>
+
+                    <SubmitButton startIcon={<AddIcon />}>Add</SubmitButton>
+                  </div>
                 </Grid>
-
-                <Grid item xs={12}>
-                  <TextField name="tags" label="Tags" />
-                </Grid>
-
-                <div className="d-flex addButtons">
-                  <ButtonWrapper
-                    startIcon={<ClearIcon />}
-                    style={{ marginRight: "15px" }}
-                  >
-                    Clear
-                  </ButtonWrapper>
-
-                  <SubmitButton startIcon={<AddIcon />}>Add</SubmitButton>
-                </div>
-              </Grid>
-            </Form>
+              </Form>
+            )}
           </Formik>
         </DialogContent>
       </div>

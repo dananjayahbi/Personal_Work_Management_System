@@ -8,6 +8,9 @@ import { Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import DeleteIdea from "../PageComponents/DeleteIdea";
 import UpdateIdea from "../PageComponents/UpdateIdea";
 import ButtonWrapper from "../FormsUI/Button";
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import IconButton from '@mui/material/IconButton';
 
 export default function Ideas() {
   const [fetIdeas, setFetchedIdeas] = useState([]);
@@ -26,6 +29,7 @@ export default function Ideas() {
         .get("http://localhost:8070/ideas/getAllIdeas")
         .then((res) => {
           setFetchedIdeas(res.data);
+          console.log(res.data);
         })
         .catch((err) => {
           console.log(err);
@@ -47,11 +51,28 @@ export default function Ideas() {
       });
   };
 
-  // To display ideas as cards
+  //handle update functions (reset bookmark status)
+  const handleUpdates = (id, bookmarkStatus, updatedTags) => {
+    axios
+      .put(`http://localhost:8070/ideas/updateIdea/${id}`, {
+        bookmark: bookmarkStatus,
+        tags: updatedTags,
+      })
+      .then((response) => {
+        // Handle the successful update if needed
+        console.log("Idea update successful:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error updating idea:", error);
+        // Handle any error during idea update
+      });
+  };
+
+  // To display ideas as cards...
   const IdeaList = ({ ideas }) => {
     const filteredIdeas = selectedTags.length > 0
-      ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
-      : ideas;
+    ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
+    : ideas;
 
     const handleDelete = (ideaID) => {
       setSelectedIdeaID(ideaID);
@@ -63,52 +84,83 @@ export default function Ideas() {
       setOpenPopup5(true);
     };
 
+    const handleBookmark = (id) => {
+      setFetchedIdeas((prevIdeas) => {
+        return prevIdeas.map((idea) => {
+          if (idea._id === id) {
+            const bookmarkStatus = !idea.bookmark ? "true" : "false";
+            const updatedTags = bookmarkStatus === "true" ? [...idea.tags, "bookmarked"] : idea.tags.filter(tag => tag !== "bookmarked");
+            handleUpdates(id, bookmarkStatus, updatedTags);
+            
+            return {
+              ...idea,
+              bookmark: !idea.bookmark,
+              tags: updatedTags,
+            };
+          }
+          return idea;
+        });
+      });
+    };
+    
+
     return (
       <Grid container spacing={1.5}>
-        {filteredIdeas.map((idea, index) => (
-          <Grid item xs={12} sm={6} md={6} key={index}>
-            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography sx={{ marginBottom: '15px' }}>{idea.idea}</Typography>
-                <Typography  fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
-                <Grid container spacing={1}>
-                  {idea.tags.map((tag, tagIndex) => (
-                    <Grid item key={tagIndex}>
-                      <Chip label={tag} variant="outlined" />
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: '20px', // Adjust the margin as needed
-                }}
+      {filteredIdeas.map((idea, index) => (
+        <Grid item xs={12} sm={6} md={6} key={index}>
+          <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
+
+            {/* the bookmark icon */}
+            <IconButton
+                sx={{ float: "right" }}
+                onClick={() => handleBookmark(idea._id)}
               >
-                <Button
-                  variant="outlined"
-                  color="success"
-                  sx={{ width: '25%', marginRight: '4px' }}
-                  onClick={() => handleUpdate(idea._id)}
-                >
-                  Update
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  sx={{ width: '25%', marginLeft: '4px' }}
-                  onClick={() => handleDelete(idea._id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                {idea.bookmark ? (
+                  <BookmarkIcon color="primary" />
+                ) : (
+                  <BookmarkBorderIcon color="primary" />
+                )}
+              </IconButton>
 
-
+              <Typography sx={{ marginBottom: '15px', marginTop: '50px' }}>{idea.idea}</Typography>
+              <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
+              <Grid container spacing={1}>
+                {idea.tags.map((tag, tagIndex) => (
+                  <Grid item key={tagIndex}>
+                    <Chip label={tag} variant="outlined" />
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: '20px', // Adjust the margin as needed
+              }}
+            >
+              <Button
+                variant="outlined"
+                color="success"
+                sx={{ width: '25%', marginRight: '4px' }}
+                onClick={() => handleUpdate(idea._id)}
+              >
+                Update
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                sx={{ width: '25%', marginLeft: '4px' }}
+                onClick={() => handleDelete(idea._id,idea.bookmark)}
+              >
+                Delete
+              </Button>
+            </div>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
     );
   };
 

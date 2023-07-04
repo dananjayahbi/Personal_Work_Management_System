@@ -16,7 +16,9 @@ const newIdea = async (req, res) => {
   try {
     const {
       idea,
-      tags
+      tags,
+      ideaStatus,
+      bookmark
     } = req.body;
 
     // Check if the same idea exists
@@ -30,7 +32,9 @@ const newIdea = async (req, res) => {
     } else {
       const ideaa = await Idea.create({
         idea,
-        tags
+        tags,
+        ideaStatus,
+        bookmark
       });
       if (ideaa) {
         res.status(200).json({
@@ -76,11 +80,15 @@ const updateIdea = async (req, res) => {
     const { 
       idea, 
       tags,
+      ideaStatus,
+      bookmark
     } = req.body;
 
     let updateData = {
       idea,
-      tags
+      tags,
+      ideaStatus,
+      bookmark
     };
 
     // Updating
