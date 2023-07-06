@@ -7,7 +7,11 @@ import AddIcon from "@mui/icons-material/Add";
 import { Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import DeleteIdea from "../PageComponents/DeleteIdea";
 import UpdateIdea from "../PageComponents/UpdateIdea";
+import ViewIdea from "../PageComponents/ViewIdea";
 import ButtonWrapper from "../FormsUI/Button";
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import IconButton from '@mui/material/IconButton';
 
 export default function Ideas() {
   const [fetIdeas, setFetchedIdeas] = useState([]);
@@ -15,6 +19,7 @@ export default function Ideas() {
   const [openPopup3, setOpenPopup3] = useState(false);
   const [openPopup4, setOpenPopup4] = useState(false);
   const [openPopup5, setOpenPopup5] = useState(false);
+  const [openPopup6, setOpenPopup6] = useState(false);
   const [selectedIdeaID, setSelectedIdeaID] = useState(null);
   const [filteringTags, setFilteringTags] = useState("");
   const [storedTags, setStoredTags] = useState([]);
@@ -26,6 +31,7 @@ export default function Ideas() {
         .get("http://localhost:8070/ideas/getAllIdeas")
         .then((res) => {
           setFetchedIdeas(res.data);
+          console.log(res.data);
         })
         .catch((err) => {
           console.log(err);
@@ -47,11 +53,30 @@ export default function Ideas() {
       });
   };
 
-  // To display ideas as cards
+  //handle update functions (reset bookmark status)
+  const handleUpdates = (id, bookmarkStatus, updatedTags) => {
+    axios
+      .put(`http://localhost:8070/ideas/updateIdea/${id}`, {
+        bookmark: bookmarkStatus,
+        tags: updatedTags,
+      })
+      .then((response) => {
+        // Handle the successful update if needed
+        console.log("Idea update successful:", response.data);
+      })
+      .catch((error) => {
+        console.error("Error updating idea:", error);
+        // Handle any error during idea update
+      });
+  };
+
+  // To display ideas as cards...
   const IdeaList = ({ ideas }) => {
     const filteredIdeas = selectedTags.length > 0
-      ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
-      : ideas;
+    ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
+    : ideas;
+
+    const [expandedIndex, setExpandedIndex] = useState(null);
 
     const handleDelete = (ideaID) => {
       setSelectedIdeaID(ideaID);
@@ -63,14 +88,86 @@ export default function Ideas() {
       setOpenPopup5(true);
     };
 
+    const handleView = (ideaID) => {
+      setSelectedIdeaID(ideaID);
+      setOpenPopup6(true);
+      setExpandedIndex();
+    };
+
+    const handleBookmark = (id) => {
+      setFetchedIdeas((prevIdeas) => {
+        return prevIdeas.map((idea) => {
+          if (idea._id === id) {
+            const bookmarkStatus = !idea.bookmark ? "true" : "false";
+            const updatedTags = bookmarkStatus === "true" ? [...idea.tags, "bookmarked"] : idea.tags.filter(tag => tag !== "bookmarked");
+            handleUpdates(id, bookmarkStatus, updatedTags);
+            
+            return {
+              ...idea,
+              bookmark: !idea.bookmark,
+              tags: updatedTags,
+            };
+          }
+          return idea;
+        });
+      });
+    };
+
+
+
+
     return (
       <Grid container spacing={1.5}>
         {filteredIdeas.map((idea, index) => (
           <Grid item xs={12} sm={6} md={6} key={index}>
             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
               <CardContent sx={{ flexGrow: 1 }}>
-                <Typography sx={{ marginBottom: '15px' }}>{idea.idea}</Typography>
-                <Typography  fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
+                {/* the bookmark icon */}
+                <IconButton
+                  sx={{ float: 'right' }}
+                  onClick={() => handleBookmark(idea._id)}
+                >
+                  {idea.bookmark ? (
+                    <BookmarkIcon color="primary" />
+                  ) : (
+                    <BookmarkBorderIcon color="primary" />
+                  )}
+                </IconButton>
+    
+                <div>
+                  {idea.idea.length > 500 ? (
+                    <>
+                      <Typography
+                        sx={{ marginBottom: '15px', marginTop: '50px' }}
+                      >
+                        {idea.idea.slice(0, 500).split('\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                        
+                        {expandedIndex !== index && (
+                        <Typography
+                          color="primary"
+                          sx={{ marginBottom: '15px', cursor: 'pointer' }}
+                          onClick={() => handleView(idea._id)}
+                        >
+                          Read more...
+                        </Typography>
+                      )}
+                      </Typography>
+                      
+                    </>
+                  ) : (
+                    <Typography
+                      sx={{ marginBottom: '15px', marginTop: '50px' }}
+                    >
+                      {idea.idea.split('\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                    </Typography>
+                  )}
+                </div>
+    
+                <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
                 <Grid container spacing={1}>
                   {idea.tags.map((tag, tagIndex) => (
                     <Grid item key={tagIndex}>
@@ -79,26 +176,29 @@ export default function Ideas() {
                   ))}
                 </Grid>
               </CardContent>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: '20px', // Adjust the margin as needed
-                }}
-              >
+    
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  sx={{ width: '25%', marginRight: '4px' }}
+                  onClick={() => handleView(idea._id)}
+                >
+                  View
+                </Button>
                 <Button
                   variant="outlined"
                   color="success"
                   sx={{ width: '25%', marginRight: '4px' }}
                   onClick={() => handleUpdate(idea._id)}
                 >
-                  Update
+                  Edit
                 </Button>
                 <Button
                   variant="outlined"
                   color="error"
                   sx={{ width: '25%', marginLeft: '4px' }}
-                  onClick={() => handleDelete(idea._id)}
+                  onClick={() => handleDelete(idea._id, idea.bookmark)}
                 >
                   Delete
                 </Button>
@@ -107,8 +207,6 @@ export default function Ideas() {
           </Grid>
         ))}
       </Grid>
-
-
     );
   };
 
@@ -165,6 +263,7 @@ export default function Ideas() {
             "&:hover": {
               backgroundColor: "#1e6907",
               color: "white",
+              border: "1px solid #1e6907"
             },
           }}
           onClick={() => setOpenPopup3(true)}
@@ -183,7 +282,7 @@ export default function Ideas() {
               <div style={{ display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
-                  placeholder="Enter tags separated by comma"
+                  placeholder="Enter filtering tags separated by comma"
                   style={{
                     marginRight: "10px",
                     padding: "10px",
@@ -305,6 +404,15 @@ export default function Ideas() {
           </Grid>
         </Grid>
       </div>
+
+      {/* View Idea Popup */}
+      {selectedIdeaID && (
+        <ViewIdea
+          ideaID={selectedIdeaID}
+          openPopup={openPopup6}
+          setOpenPopup={setOpenPopup6}
+        />
+      )}
 
       {/* Delete Idea Popup */}
       {selectedIdeaID && (

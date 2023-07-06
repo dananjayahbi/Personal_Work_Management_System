@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Divider, Grid } from "@mui/material";
+import React, { useState , useEffect } from "react";
+import { Divider, Grid, MenuItem, Chip } from "@mui/material";
 import "../../styles/dashboard.css";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -12,7 +12,6 @@ import axios from "axios";
 import TextField from "../FormsUI/TextField";
 import ButtonWrapper from "../FormsUI/Button";
 import SubmitButton from "../FormsUI/SubmitButton";
-import { useNavigate } from "react-router-dom";
 import Notification from "../DispayComponents/Notification";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -22,11 +21,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 // FORMIK
 const INITIAL_FORM_STATE = {
   idea: "",
-  tags: ""
+  tags: []
 };
 
 export default function AddUser(props) {
-  const navigate = useNavigate();
   const { openPopup3, setOpenPopup3 } = props;
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -34,14 +32,39 @@ export default function AddUser(props) {
     type: ""
   });
 
+  const [storedTags, setStoredTags] = useState([]); //The array of tags
+
+  // Get all tags
+  useEffect(() => {
+    fetchStoredTags();
+  }, [openPopup3]);
+
+  const fetchStoredTags = () => {
+    axios
+      .get("http://localhost:8070/tags/getTags")
+      .then((res) => {
+        setStoredTags(res.data.tags);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  // Close the popup when clicking away from the window
+  const handleBackdropClick = () => {
+    setOpenPopup3(false);
+  };
+
   return (
     <Dialog
       open={openPopup3}
-      maxWidth="sm"
       TransitionComponent={Transition}
+      maxWidth="lg"
+      fullWidth
       PaperProps={{
         style: { borderRadius: 10 }
       }}
+      onBackdropClick={handleBackdropClick} // Close the popup when clicking away from the window
     >
       <div className="popup">
         <DialogTitle>
@@ -77,16 +100,17 @@ export default function AddUser(props) {
           <Formik
             initialValues={{ ...INITIAL_FORM_STATE }}
             onSubmit={async (values) => {
-              const tagsArray = values.tags.split(",").map((tag) => tag.trim());
+              const tagsString = values.tags;
               await axios
                 .post("http://localhost:8070/ideas/newIdea", {
                   idea: values.idea,
-                  tags: tagsArray
+                  tags: tagsString,
+                  ideaStatus: "none",
+                  bookmark: "false"
                 })
                 .then((res) => {
                   sessionStorage.setItem("ideaCreated", "1");
                   setOpenPopup3(false);
-                  //window.location.href = "./ideas";
                 })
                 .catch((err) => {
                   if (
@@ -101,28 +125,61 @@ export default function AddUser(props) {
                 });
             }}
           >
-            <Form>
-              <Grid container sx={{ paddingTop: "10px" }} spacing={2}>
-                <Grid item xs={12}>
-                  <TextField name="idea" label="Idea" multiline minRows={10} />
-                </Grid>
+            {({ values, handleChange, handleBlur, errors, touched }) => (
+              <Form>
+                <Grid container sx={{ paddingTop: "10px" }} spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField name="idea" label="Idea" multiline minRows={10} />
+                  </Grid>
 
-                <Grid item xs={12}>
-                  <TextField name="tags" label="Tags" />
-                </Grid>
-
-                <div className="d-flex addButtons">
-                  <ButtonWrapper
-                    startIcon={<ClearIcon />}
-                    style={{ marginRight: "15px" }}
+                  <Grid item xs={12}>
+                  <TextField
+                    name="tags"
+                    label="Tags"
+                    select
+                    SelectProps={{
+                      multiple: true,
+                      renderValue: (selected) => (
+                        <div>
+                          {selected.map((value) => (
+                            <Chip key={value} label={value} style={{ margin: 2 }} />
+                          ))}
+                        </div>
+                      ),
+                    }}
+                    value={values.tags}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.tags && Boolean(errors.tags)}
+                    helperText={touched.tags && errors.tags}
                   >
-                    Clear
-                  </ButtonWrapper>
+                    {storedTags.map((tag) => {
+                      if (tag !== "bookmarked") {
+                        return (
+                          <MenuItem key={tag} value={tag}>
+                            {tag}
+                          </MenuItem>
+                        );
+                      }
+                      return null;
+                    })}
+                  </TextField>
 
-                  <SubmitButton startIcon={<AddIcon />}>Add</SubmitButton>
-                </div>
-              </Grid>
-            </Form>
+                  </Grid>
+
+                  <div className="d-flex addButtons">
+                    <ButtonWrapper
+                      style={{ marginRight: "15px" }}
+                      onClick={() => setOpenPopup3(false)}
+                    >
+                      Cancel
+                    </ButtonWrapper>
+
+                    <SubmitButton startIcon={<AddIcon />}>Add</SubmitButton>
+                  </div>
+                </Grid>
+              </Form>
+            )}
           </Formik>
         </DialogContent>
       </div>

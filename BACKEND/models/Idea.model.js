@@ -11,6 +11,13 @@ const newIdea = new Schema(
     tags: {
       type: Array,
       required: true,
+    },
+    ideaStatus: {
+      type: String,
+    },
+    bookmark: {
+      type: Boolean,
+      required: true,
     }
   },
   {
