@@ -1,5 +1,5 @@
 import React, { useState , useEffect } from "react";
-import { Divider, Grid, MenuItem } from "@mui/material";
+import { Divider, Grid, MenuItem, Chip } from "@mui/material";
 import "../../styles/dashboard.css";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -12,7 +12,6 @@ import axios from "axios";
 import TextField from "../FormsUI/TextField";
 import ButtonWrapper from "../FormsUI/Button";
 import SubmitButton from "../FormsUI/SubmitButton";
-import { useNavigate } from "react-router-dom";
 import Notification from "../DispayComponents/Notification";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -26,7 +25,6 @@ const INITIAL_FORM_STATE = {
 };
 
 export default function AddUser(props) {
-  const navigate = useNavigate();
   const { openPopup3, setOpenPopup3 } = props;
   const [notify, setNotify] = useState({
     isOpen: false,
@@ -95,12 +93,12 @@ export default function AddUser(props) {
           <Formik
             initialValues={{ ...INITIAL_FORM_STATE }}
             onSubmit={async (values) => {
-              const tagsString = values.tags.join(", ");
+              const tagsString = values.tags;
               await axios
                 .post("http://localhost:8070/ideas/newIdea", {
                   idea: values.idea,
                   tags: tagsString,
-                  ideaStatus: "",
+                  ideaStatus: "none",
                   bookmark: "false"
                 })
                 .then((res) => {
@@ -134,7 +132,13 @@ export default function AddUser(props) {
                       select
                       SelectProps={{
                         multiple: true,
-                        renderValue: (selected) => selected.join(", "),
+                        renderValue: (selected) => (
+                          <div>
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} style={{ margin: 2 }} />
+                            ))}
+                          </div>
+                        ),
                       }}
                       value={values.tags}
                       onChange={handleChange}

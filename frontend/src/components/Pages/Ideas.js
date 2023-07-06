@@ -7,6 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Card, CardContent, Chip, Grid, Typography } from '@mui/material';
 import DeleteIdea from "../PageComponents/DeleteIdea";
 import UpdateIdea from "../PageComponents/UpdateIdea";
+import ViewIdea from "../PageComponents/ViewIdea";
 import ButtonWrapper from "../FormsUI/Button";
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -18,6 +19,7 @@ export default function Ideas() {
   const [openPopup3, setOpenPopup3] = useState(false);
   const [openPopup4, setOpenPopup4] = useState(false);
   const [openPopup5, setOpenPopup5] = useState(false);
+  const [openPopup6, setOpenPopup6] = useState(false);
   const [selectedIdeaID, setSelectedIdeaID] = useState(null);
   const [filteringTags, setFilteringTags] = useState("");
   const [storedTags, setStoredTags] = useState([]);
@@ -84,6 +86,11 @@ export default function Ideas() {
       setOpenPopup5(true);
     };
 
+    const handleView = (ideaID) => {
+      setSelectedIdeaID(ideaID);
+      setOpenPopup6(true);
+    };
+
     const handleBookmark = (id) => {
       setFetchedIdeas((prevIdeas) => {
         return prevIdeas.map((idea) => {
@@ -102,66 +109,69 @@ export default function Ideas() {
         });
       });
     };
-    
+
 
     return (
       <Grid container spacing={1.5}>
-      {filteredIdeas.map((idea, index) => (
-        <Grid item xs={12} sm={6} md={6} key={index}>
-          <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <CardContent sx={{ flexGrow: 1 }}>
-
-            {/* the bookmark icon */}
-            <IconButton
-                sx={{ float: "right" }}
-                onClick={() => handleBookmark(idea._id)}
-              >
-                {idea.bookmark ? (
-                  <BookmarkIcon color="primary" />
-                ) : (
-                  <BookmarkBorderIcon color="primary" />
-                )}
-              </IconButton>
-
-              <Typography sx={{ marginBottom: '15px', marginTop: '50px' }}>{idea.idea}</Typography>
-              <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
-              <Grid container spacing={1}>
-                {idea.tags.map((tag, tagIndex) => (
-                  <Grid item key={tagIndex}>
-                    <Chip label={tag} variant="outlined" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '20px', // Adjust the margin as needed
-              }}
-            >
-              <Button
-                variant="outlined"
-                color="success"
-                sx={{ width: '25%', marginRight: '4px' }}
-                onClick={() => handleUpdate(idea._id)}
-              >
-                Update
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                sx={{ width: '25%', marginLeft: '4px' }}
-                onClick={() => handleDelete(idea._id,idea.bookmark)}
-              >
-                Delete
-              </Button>
-            </div>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
-    );
+        {filteredIdeas.map((idea, index) => (
+          <Grid item xs={12} sm={6} md={6} key={index}>
+            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <CardContent sx={{ flexGrow: 1 }}>
+                {/* the bookmark icon */}
+                <IconButton
+                  sx={{ float: 'right' }}
+                  onClick={() => handleBookmark(idea._id)}
+                >
+                  {idea.bookmark ? (
+                    <BookmarkIcon color="primary" />
+                  ) : (
+                    <BookmarkBorderIcon color="primary" />
+                  )}
+                </IconButton>
+    
+                <Typography sx={{ marginBottom: '15px', marginTop: '50px' }}>{idea.idea}</Typography>
+                <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
+                <Grid container spacing={1}>
+                  {idea.tags.map((tag, tagIndex) => (
+                    <Grid item key={tagIndex}>
+                      <Chip label={tag} variant="outlined" />
+                    </Grid>
+                  ))}
+                </Grid>
+              </CardContent>
+    
+              {/* Buttons for stages */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  sx={{ width: '25%', marginRight: '4px' }}
+                  onClick={() => handleView(idea._id)}
+                >
+                  View
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  sx={{ width: '25%', marginRight: '4px' }}
+                  onClick={() => handleUpdate(idea._id)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ width: '25%', marginLeft: '4px' }}
+                  onClick={() => handleDelete(idea._id, idea.bookmark)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    );    
   };
 
   const handleTagChange = (event) => {
@@ -357,6 +367,15 @@ export default function Ideas() {
           </Grid>
         </Grid>
       </div>
+
+      {/* View Idea Popup */}
+      {selectedIdeaID && (
+        <ViewIdea
+          ideaID={selectedIdeaID}
+          openPopup={openPopup6}
+          setOpenPopup={setOpenPopup6}
+        />
+      )}
 
       {/* Delete Idea Popup */}
       {selectedIdeaID && (

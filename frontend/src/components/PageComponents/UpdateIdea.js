@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
@@ -10,29 +8,43 @@ import { Form, Formik } from "formik";
 import TextField from "../FormsUI/TextField";
 import ButtonWrapper from "../FormsUI/Button";
 import SubmitButton from "../FormsUI/SubmitButton";
-import { useNavigate } from "react-router-dom";
 import Notification from "../DispayComponents/Notification";
+import { Chip, Grid, MenuItem } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
 const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
-  const navigate = useNavigate();
   const [notify, setNotify] = useState({
     isOpen: false,
     message: "",
     type: ""
   });
-  const [initialValues, setInitialValues] = useState({
-    idea: "",
-    tags: ""
-  });
+
   const [formValues, setFormValues] = useState({
     idea: "",
-    tags: ""
+    tags: []
   });
   const [loading, setLoading] = useState(true);
+  const [storedTags, setStoredTags] = useState([]); // The array of tags
+
+  // Get all tags
+  useEffect(() => {
+    fetchStoredTags();
+  }, [openPopup]);
+
+  const fetchStoredTags = () => {
+    axios
+      .get("http://localhost:8070/tags/getTags")
+      .then((res) => {
+        setStoredTags(res.data.tags);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   // Fetch idea data with the given ID
   useEffect(() => {
@@ -42,8 +54,7 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
         .get(`http://localhost:8070/ideas/getIdea/${ideaID}`)
         .then((res) => {
           const { idea, tags } = res.data;
-          setInitialValues({ idea, tags: tags.join(",") });
-          setFormValues({ idea, tags: tags.join(",") });
+          setFormValues({ idea, tags });
           setLoading(false);
         })
         .catch((err) => {
@@ -52,14 +63,13 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
           // Handle any error during idea fetch
         });
     }
-  }, [ideaID]);
+  }, [ideaID,openPopup]);
 
   const handleUpdate = (values) => {
-    const tagsArray = values.tags.split(",").map((tag) => tag.trim());
     axios
       .put(`http://localhost:8070/ideas/updateIdea/${ideaID}`, {
         idea: values.idea,
-        tags: tagsArray
+        tags: values.tags
       })
       .then((res) => {
         console.log('Idea updated successfully!');
@@ -87,7 +97,19 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
       <div className="popup">
         <DialogTitle sx={{ marginBottom: '-25px' }}>
           <div className="d-flex justify-content-between">
-            <p className="popupTitle">Update Idea</p>
+            <p className="popupTitle">Edit Idea</p>
+            <ClearIcon
+              onClick={() => {
+                setOpenPopup(false);
+              }}
+              sx={{
+                cursor: "pointer",
+                color: "var(--blue)",
+                fontSize: "1.7rem",
+                marginTop: "6px",
+                marginRight: "10px"
+              }}
+            />
           </div>
 
           {/* NOTIFICATION */}
@@ -99,24 +121,65 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
             initialValues={formValues}
             onSubmit={handleUpdate}
           >
-
+            {({ values, handleChange, handleBlur, errors, touched }) => (
               <Form>
-                <TextField name="idea" label="Idea" sx={{ marginTop: '15px' , marginBottom: '15px' }} multiline minRows={10} />
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField name="idea" label="Idea" sx={{ marginTop: '15px' , marginBottom: '15px' }} multiline minRows={10} />
+                  </Grid>
 
-                <TextField name="tags" label="Tags" />
+                  <Grid item xs={12}>
+                    <TextField
+                      name="tags"
+                      label="Tags"
+                      select
+                      SelectProps={{
+                        multiple: true,
+                        renderValue: (selected) => (
+                          <div>
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} style={{ margin: 2 }} />
+                            ))}
+                          </div>
+                        ),
+                      }}
+                      value={values.tags}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.tags && Boolean(errors.tags)}
+                      helperText={touched.tags && errors.tags}
+                      InputProps={{
+                        style: { minHeight: 'unset' }
+                      }}
+                      inputProps={{
+                        style: {
+                          minHeight: 'unset',
+                          maxHeight: 'unset'
+                        },
+                        rows: values.tags.length === 0 ? 1 : values.tags.length
+                      }}
+                    >
+                      {storedTags.map((tag) => (
+                        <MenuItem key={tag} value={tag}>
+                          {tag}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
 
-                <div className="d-flex addButtons">
-                  <ButtonWrapper
-                    style={{ marginRight: "15px" }}
-                    onClick={() => setOpenPopup(false)}
-                  >
-                    Cancel
-                  </ButtonWrapper>
+                  <div className="d-flex addButtons">
+                    <ButtonWrapper
+                      style={{ marginRight: "15px" }}
+                      onClick={() => setOpenPopup(false)}
+                    >
+                      Cancel
+                    </ButtonWrapper>
 
-                  <SubmitButton>Update</SubmitButton>
-                </div>
+                    <SubmitButton>Update</SubmitButton>
+                  </div>
+                </Grid>
               </Form>
-
+            )}
           </Formik>
         </DialogContent>
       </div>
