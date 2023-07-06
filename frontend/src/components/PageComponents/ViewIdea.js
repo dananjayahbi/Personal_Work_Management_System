@@ -56,12 +56,18 @@ const ViewIdea = ({ ideaID, openPopup, setOpenPopup }) => {
     return <div className="d-flex justify-content-center">Loading...</div>; // Render a loading state while data is being fetched
   }
 
+  // Close the popup when clicking away from the window
+  const handleBackdropClick = () => {
+    setOpenPopup(false);
+  };
+
   return (
     <Dialog
       open={openPopup}
       TransitionComponent={Transition}
       maxWidth="lg"
       fullWidth
+      onBackdropClick={handleBackdropClick} // Close the popup when clicking away from the window
     >
       <div className="popup">
         <DialogTitle sx={{ marginBottom: '-25px' }}>
@@ -90,17 +96,17 @@ const ViewIdea = ({ ideaID, openPopup, setOpenPopup }) => {
             initialValues={formValues}
             onSubmit={handleClose}
           >
-              <Form>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <TextField name="idea" label="Idea" sx={{ marginTop: '15px' , marginBottom: '15px' }} multiline minRows={10} />
-                  </Grid>
-
-                  <div className="d-flex addButtons">
-                    <SubmitButton>Close</SubmitButton>
-                  </div>
+            <Form>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField name="idea" label="Idea" sx={{ marginTop: '15px' , marginBottom: '15px' }} multiline minRows={10} />
                 </Grid>
-              </Form>
+
+                <div className="d-flex addButtons">
+                  <SubmitButton>Close</SubmitButton>
+                </div>
+              </Grid>
+            </Form>
           </Formik>
         </DialogContent>
       </div>

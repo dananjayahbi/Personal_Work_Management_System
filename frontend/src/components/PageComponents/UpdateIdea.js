@@ -86,13 +86,21 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
     return <div className="d-flex justify-content-center">Loading...</div>; // Render a loading state while data is being fetched
   }
 
+  // Close the popup when clicking away from the window
+  const handleBackdropClick = () => {
+    setOpenPopup(false);
+  };
+
   return (
     <Dialog
       open={openPopup}
       TransitionComponent={Transition}
+      maxWidth="lg"
+      fullWidth
       PaperProps={{
         style: { borderRadius: 10 }
       }}
+      onBackdropClick={handleBackdropClick} // Close the popup when clicking away from the window
     >
       <div className="popup">
         <DialogTitle sx={{ marginBottom: '-25px' }}>
@@ -159,11 +167,16 @@ const UpdateIdea = ({ ideaID, openPopup, setOpenPopup }) => {
                         rows: values.tags.length === 0 ? 1 : values.tags.length
                       }}
                     >
-                      {storedTags.map((tag) => (
-                        <MenuItem key={tag} value={tag}>
-                          {tag}
-                        </MenuItem>
-                      ))}
+                      {storedTags.map((tag) => {
+                      if (tag !== "bookmarked") {
+                        return (
+                          <MenuItem key={tag} value={tag}>
+                            {tag}
+                          </MenuItem>
+                        );
+                      }
+                      return null;
+                    })}
                     </TextField>
                   </Grid>
 

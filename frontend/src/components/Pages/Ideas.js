@@ -76,6 +76,8 @@ export default function Ideas() {
     ? ideas.filter((idea) => selectedTags.every(tag => idea.tags.includes(tag)))
     : ideas;
 
+    const [expandedIndex, setExpandedIndex] = useState(null);
+
     const handleDelete = (ideaID) => {
       setSelectedIdeaID(ideaID);
       setOpenPopup4(true);
@@ -89,6 +91,7 @@ export default function Ideas() {
     const handleView = (ideaID) => {
       setSelectedIdeaID(ideaID);
       setOpenPopup6(true);
+      setExpandedIndex();
     };
 
     const handleBookmark = (id) => {
@@ -111,6 +114,8 @@ export default function Ideas() {
     };
 
 
+
+
     return (
       <Grid container spacing={1.5}>
         {filteredIdeas.map((idea, index) => (
@@ -129,7 +134,39 @@ export default function Ideas() {
                   )}
                 </IconButton>
     
-                <Typography sx={{ marginBottom: '15px', marginTop: '50px' }}>{idea.idea}</Typography>
+                <div>
+                  {idea.idea.length > 500 ? (
+                    <>
+                      <Typography
+                        sx={{ marginBottom: '15px', marginTop: '50px' }}
+                      >
+                        {idea.idea.slice(0, 500).split('\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                        
+                        {expandedIndex !== index && (
+                        <Typography
+                          color="primary"
+                          sx={{ marginBottom: '15px', cursor: 'pointer' }}
+                          onClick={() => handleView(idea._id)}
+                        >
+                          Read more...
+                        </Typography>
+                      )}
+                      </Typography>
+                      
+                    </>
+                  ) : (
+                    <Typography
+                      sx={{ marginBottom: '15px', marginTop: '50px' }}
+                    >
+                      {idea.idea.split('\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                    </Typography>
+                  )}
+                </div>
+    
                 <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
                 <Grid container spacing={1}>
                   {idea.tags.map((tag, tagIndex) => (
@@ -140,7 +177,6 @@ export default function Ideas() {
                 </Grid>
               </CardContent>
     
-              {/* Buttons for stages */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
                 <Button
                   variant="outlined"
@@ -171,7 +207,7 @@ export default function Ideas() {
           </Grid>
         ))}
       </Grid>
-    );    
+    );
   };
 
   const handleTagChange = (event) => {
@@ -227,6 +263,7 @@ export default function Ideas() {
             "&:hover": {
               backgroundColor: "#1e6907",
               color: "white",
+              border: "1px solid #1e6907"
             },
           }}
           onClick={() => setOpenPopup3(true)}
@@ -245,7 +282,7 @@ export default function Ideas() {
               <div style={{ display: "flex", alignItems: "center" }}>
                 <input
                   type="text"
-                  placeholder="Enter tags separated by comma"
+                  placeholder="Enter filtering tags separated by comma"
                   style={{
                     marginRight: "10px",
                     padding: "10px",

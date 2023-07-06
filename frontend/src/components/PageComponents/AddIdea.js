@@ -50,14 +50,21 @@ export default function AddUser(props) {
       });
   };
 
+  // Close the popup when clicking away from the window
+  const handleBackdropClick = () => {
+    setOpenPopup3(false);
+  };
+
   return (
     <Dialog
       open={openPopup3}
-      maxWidth="sm"
       TransitionComponent={Transition}
+      maxWidth="lg"
+      fullWidth
       PaperProps={{
         style: { borderRadius: 10 }
       }}
+      onBackdropClick={handleBackdropClick} // Close the popup when clicking away from the window
     >
       <div className="popup">
         <DialogTitle>
@@ -126,32 +133,38 @@ export default function AddUser(props) {
                   </Grid>
 
                   <Grid item xs={12}>
-                    <TextField
-                      name="tags"
-                      label="Tags"
-                      select
-                      SelectProps={{
-                        multiple: true,
-                        renderValue: (selected) => (
-                          <div>
-                            {selected.map((value) => (
-                              <Chip key={value} label={value} style={{ margin: 2 }} />
-                            ))}
-                          </div>
-                        ),
-                      }}
-                      value={values.tags}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={touched.tags && Boolean(errors.tags)}
-                      helperText={touched.tags && errors.tags}
-                    >
-                      {storedTags.map((tag) => (
-                        <MenuItem key={tag} value={tag}>
-                          {tag}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                  <TextField
+                    name="tags"
+                    label="Tags"
+                    select
+                    SelectProps={{
+                      multiple: true,
+                      renderValue: (selected) => (
+                        <div>
+                          {selected.map((value) => (
+                            <Chip key={value} label={value} style={{ margin: 2 }} />
+                          ))}
+                        </div>
+                      ),
+                    }}
+                    value={values.tags}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.tags && Boolean(errors.tags)}
+                    helperText={touched.tags && errors.tags}
+                  >
+                    {storedTags.map((tag) => {
+                      if (tag !== "bookmarked") {
+                        return (
+                          <MenuItem key={tag} value={tag}>
+                            {tag}
+                          </MenuItem>
+                        );
+                      }
+                      return null;
+                    })}
+                  </TextField>
+
                   </Grid>
 
                   <div className="d-flex addButtons">
