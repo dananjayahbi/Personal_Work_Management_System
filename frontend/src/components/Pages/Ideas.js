@@ -77,6 +77,31 @@ export default function Ideas() {
     : ideas;
 
     const [expandedIndex, setExpandedIndex] = useState(null);
+    const [initialCardsCount, setInitialCardsCount] = useState(6);
+    const [cardsCount, setCardsCount] = useState(initialCardsCount);
+    const visibleIdeas = filteredIdeas.slice(0, cardsCount);
+
+    const handleViewMore = () => {
+      if (cardsCount < filteredIdeas.length) {
+        setCardsCount(cardsCount + initialCardsCount);
+      }
+    };
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (
+          window.innerHeight + window.scrollY >=
+          document.body.offsetHeight
+        ) {
+          handleViewMore();
+        }
+      };
+  
+      window.addEventListener('scroll', handleScroll);
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }, []);
 
     const handleDelete = (ideaID) => {
       setSelectedIdeaID(ideaID);
@@ -117,97 +142,102 @@ export default function Ideas() {
 
 
     return (
-      <Grid container spacing={1.5}>
-        {filteredIdeas.map((idea, index) => (
-          <Grid item xs={12} sm={6} md={6} key={index}>
-            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                {/* the bookmark icon */}
-                <IconButton
-                  sx={{ float: 'right' }}
-                  onClick={() => handleBookmark(idea._id)}
-                >
-                  {idea.bookmark ? (
-                    <BookmarkIcon color="primary" />
-                  ) : (
-                    <BookmarkBorderIcon color="primary" />
-                  )}
-                </IconButton>
+      <div>
+        <Grid container spacing={1.5}>
+          {visibleIdeas.map((idea, index) => (
+            <Grid item xs={12} sm={6} md={6} key={index}>
+              <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  {/* the bookmark icon */}
+                  <IconButton
+                    sx={{ float: 'right' }}
+                    onClick={() => handleBookmark(idea._id)}
+                  >
+                    {idea.bookmark ? (
+                      <BookmarkIcon color="primary" />
+                    ) : (
+                      <BookmarkBorderIcon color="primary" />
+                    )}
+                  </IconButton>
     
-                <div>
-                  {idea.idea.length > 500 ? (
-                    <>
+                  <div>
+                    {idea.idea.length > 500 ? (
+                      <>
+                        <Typography
+                          sx={{ marginBottom: '15px', marginTop: '50px' }}
+                        >
+                          {idea.idea.slice(0, 500).split('\n').map((paragraph, i) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </Typography>
+    
+                        {expandedIndex !== index && (
+                          <Typography
+                            color="primary"
+                            sx={{ marginBottom: '15px', cursor: 'pointer' }}
+                            onClick={() => handleView(idea._id)}
+                          >
+                            Read more...
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
                       <Typography
                         sx={{ marginBottom: '15px', marginTop: '50px' }}
                       >
-                        {idea.idea.slice(0, 500).split('\n').map((paragraph, i) => (
+                        {idea.idea.split('\n').map((paragraph, i) => (
                           <p key={i}>{paragraph}</p>
                         ))}
-                        
-                        {expandedIndex !== index && (
-                        <Typography
-                          color="primary"
-                          sx={{ marginBottom: '15px', cursor: 'pointer' }}
-                          onClick={() => handleView(idea._id)}
-                        >
-                          Read more...
-                        </Typography>
-                      )}
                       </Typography>
-                      
-                    </>
-                  ) : (
-                    <Typography
-                      sx={{ marginBottom: '15px', marginTop: '50px' }}
-                    >
-                      {idea.idea.split('\n').map((paragraph, i) => (
-                          <p key={i}>{paragraph}</p>
-                        ))}
-                    </Typography>
-                  )}
+                    )}
+                  </div>
+    
+                  <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
+                  <Grid container spacing={1}>
+                    {idea.tags.map((tag, tagIndex) => (
+                      <Grid item key={tagIndex}>
+                        <Chip label={tag} variant="outlined" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+    
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    sx={{ width: '25%', marginRight: '4px' }}
+                    onClick={() => handleView(idea._id)}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    sx={{ width: '25%', marginRight: '4px' }}
+                    onClick={() => handleUpdate(idea._id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    sx={{ width: '25%', marginLeft: '4px' }}
+                    onClick={() => handleDelete(idea._id, idea.bookmark)}
+                  >
+                    Delete
+                  </Button>
                 </div>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
     
-                <Typography fontWeight={600} sx={{ marginBottom: '5px' }}>Tags:</Typography>
-                <Grid container spacing={1}>
-                  {idea.tags.map((tag, tagIndex) => (
-                    <Grid item key={tagIndex}>
-                      <Chip label={tag} variant="outlined" />
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-    
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  sx={{ width: '25%', marginRight: '4px' }}
-                  onClick={() => handleView(idea._id)}
-                >
-                  View
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  sx={{ width: '25%', marginRight: '4px' }}
-                  onClick={() => handleUpdate(idea._id)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  sx={{ width: '25%', marginLeft: '4px' }}
-                  onClick={() => handleDelete(idea._id, idea.bookmark)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    );
+        {cardsCount < filteredIdeas.length && (
+          <Button onClick={handleViewMore}>Load More</Button>
+        )}
+      </div>
+    ); 
   };
 
   const handleTagChange = (event) => {
