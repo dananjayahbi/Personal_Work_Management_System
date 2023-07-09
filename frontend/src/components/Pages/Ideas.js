@@ -23,24 +23,38 @@ export default function Ideas() {
   const [selectedIdeaID, setSelectedIdeaID] = useState(null);
   const [filteringTags, setFilteringTags] = useState("");
   const [storedTags, setStoredTags] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
+  const [filteredIdeas, setFilteredIdeas] = useState(fetIdeas);
 
-  // Get all ideas
-  useEffect(() => {
-    setTimeout(() => {
-      axios
-        .get("http://localhost:8070/ideas/getAllIdeas")
-        .then((res) => {
-          setFetchedIdeas(res.data);
-          console.log(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }, 500);
+// Get all ideas
+useEffect(() => {
+  setTimeout(() => {
+    axios
+      .get("http://localhost:8070/ideas/getAllIdeas")
+      .then((res) => {
+        // Shuffle the received array
+        const shuffledIdeas = shuffleArray(res.data);
+        setFetchedIdeas(shuffledIdeas);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, 500);
 
-    // Fetch stored tags from the server
-    fetchStoredTags();
-  }, [openPopup3, openPopup4, openPopup5]);
+  // Fetch stored tags from the server
+  fetchStoredTags();
+}, [openPopup3, openPopup4, openPopup5]);
+
+// Function to shuffle an array using Fisher-Yates algorithm
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 
   const fetchStoredTags = () => {
     axios
@@ -137,8 +151,6 @@ export default function Ideas() {
         });
       });
     };
-
-
 
 
     return (
@@ -240,6 +252,33 @@ export default function Ideas() {
     ); 
   };
 
+  //search handle
+  const handleSearch = (event) => {
+    const searchText = event.target.value;
+    setSearchInput(searchText);
+  
+    // Filter the ideas based on the search input
+    const filtered = fetIdeas.filter((idea) =>
+      idea.idea.toLowerCase().includes(searchText.toLowerCase())
+    );
+  
+    // Set filtered ideas if search input is not empty or set all ideas if search input is empty
+    setFilteredIdeas(searchText.trim() !== '' ? filtered : fetIdeas);
+  };  
+
+  useEffect(() => {
+    const initialSearchInput = ''; // Set your desired initial search input here
+    setSearchInput(initialSearchInput);
+  
+    // Filter the ideas based on the initial search input
+    const filtered = fetIdeas.filter((idea) =>
+      idea.idea.toLowerCase().includes(initialSearchInput.toLowerCase())
+    );
+    setFilteredIdeas(filtered);
+  }, [fetIdeas]);
+  
+  
+
   const handleTagChange = (event) => {
     setFilteringTags(event.target.value);
   };
@@ -301,6 +340,24 @@ export default function Ideas() {
           Add Idea
         </Button>
         <AddIdea openPopup3={openPopup3} setOpenPopup3={setOpenPopup3}></AddIdea>
+
+        {/* Search field */}
+        <input
+          type="text"
+          placeholder="Search ideas"
+          style={{
+            marginRight: '10px',
+            marginLeft: '5px',
+            padding: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            width: '300px',
+            outline: 'none',
+            fontSize: '14px',
+          }}
+          value={searchInput}
+          onChange={handleSearch}
+        />
       </div>
 
       {/* Tags List */}
@@ -428,9 +485,9 @@ export default function Ideas() {
 
 
           {/* Idea List */}
-          <Typography variant="h4" marginTop={"30px"} marginLeft={"-15px"} textAlign="center" color={"#28395a"}>Idea List</Typography>
+          <Typography variant="h4" marginTop={"30px"} marginLeft={"-15px"} textAlign="center" color={"#28395a"}>Idea List : {filteredIdeas.length}</Typography>
           <Grid container spacing={2} marginTop={"10px"}>
-            <IdeaList ideas={fetIdeas} />
+            <IdeaList ideas={filteredIdeas} />
           </Grid>
         </Grid>
       </div>
