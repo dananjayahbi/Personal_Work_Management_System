@@ -115,7 +115,7 @@ const shuffleArray = (array) => {
       return () => {
         window.removeEventListener('scroll', handleScroll);
       };
-    }, []);
+    });
 
     const handleDelete = (ideaID) => {
       setSelectedIdeaID(ideaID);
