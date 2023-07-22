@@ -1,13 +1,13 @@
 {
-  "name": "wfh",
+  "name": "pwm",
   "version": "1.0.0",
-  "description": "Work From Home Management System",
+  "description": "Personal work management system",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "author": "Shenal de Silva",
+  "author": "Dananjaya",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

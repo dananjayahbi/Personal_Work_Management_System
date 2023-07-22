@@ -9,7 +9,7 @@
     "backend": "cd backend && npm run dev",
     "dev": "concurrently \"npm run frontend\" \"npm run backend\""
   },
-  "author": "Shenal",
+  "author": "Dananjaya",
   "license": "ISC",
   "dependencies": {
     "@emotion/react": "^11.10.6",
