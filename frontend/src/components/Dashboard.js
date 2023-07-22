@@ -27,14 +27,17 @@ import {
 } from "react-router-dom";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import EngineeringIcon from "@mui/icons-material/Engineering";
+import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
 import Users from "./Pages/Users";
+import Testings from "./Pages/Testings";
 
 const drawerWidth = 240;
 
 // NAVIGATION
 const commonNav = [
   { name: "Dashboard", icon: <GridViewIcon />, path: "/" },
-  { name: "Ideas", icon: <LightbulbIcon />, path: "/ideas" }
+  { name: "Ideas", icon: <LightbulbIcon />, path: "/ideas" },
+  { name: "Testings", icon: <AllInclusiveIcon/>, path: "/testings" }, 
 ];
 
 const specialNav = [
@@ -404,6 +407,7 @@ export default function Dashboard() {
           <Route exact path="/" element={<Home />} />
           <Route exact path="/users" element={<Users />} />
           <Route exact path="/ideas" element={<Ideas />} />
+          <Route exact path="/testings" element={<Testings/>} />
         </Routes>
       </Box>
     </Box>
